@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>批量构造包装img</title>
+    <link rel="stylesheet" href="css/imgbox-1.0.css"/>
+    <script type="text/javascript" src="./js/jquery-1.12.1.min.js"></script>
+    <script type="text/javascript" src="js/imgbox-1.0.1.js"></script>
+
+
+
+</head>
+
+<body>
+<img src="image/hongluobo.png"/>
+<img src="image/san-luobo.png"/>
+<img src="image/tuzi-28792711.jpg"/>
+<img src="image/yigeluobo.jpg"/>
+<img src="image/yuanluobo.jpg"/>
+
+</body>
+<script>
+    //查看全局实例: ImgBox
+    console.log('查看全局ImgBox实例',ImgBox);
+
+    $('img').each(function (index,img) {
+        $(img).imgbox({
+            magnification:2,
+            min:0.1,
+            max:20
+        });
+    })
+
+</script>
+</html>

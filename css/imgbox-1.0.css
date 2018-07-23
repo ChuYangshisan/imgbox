@@ -1,5 +1,5 @@
 /*遮罩层样式*/
-.__cover__ {
+.imgbox-cover {
     position: fixed;
     z-index: 9999;
     width: 100%;
@@ -15,7 +15,7 @@
 }
 
 /*大图样式*/
-.__max_image__ {
+.imgbox-item {
     padding: 3px;
     /*padding-top: 30px;*/
     border-radius: 3px;
@@ -25,6 +25,12 @@
     /*left: 50%;*/
     /*margin-left: -140px;*/
     background-color: orange;
+    /*cursor: move;*/
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.imgbox-item {
     cursor: move;
 }
 

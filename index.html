@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="css/imgbox-1.0.css"/>
+    <script type="text/javascript" src="../js/jquery-1.12.1.min.js"></script>
+    <script type="text/javascript" src="js/imgbox-1.0.js"></script>
+
+
+
+</head>
+
+<body>
+
+<h1>demo-1 利用<code>imgbox</code>定制属性<code>imgbox-max-src</code>存放大图链接</h1>
+<img src="image/3793633099_4f9c3e08b3_m.jpg" imgbox-max-src="image/3793633099_3e1e53e4ac_o.jpg" id="demo-1" style="width: 100px"/>
+
+<h1>demo-2 没有大图链接时, 默认放大源图</h1>
+<p>本身是大图, 但由于特殊需要, 将其宽高样式设的较小. 点击图片显示原始大图片.</p>
+<img src="image/3793633099_3e1e53e4ac_o.jpg" id="demo-2" style="width: 300px;height: 300px;"/>
+
+<h1>demo-3 传入图片对象</h1>
+<p>图片对象</p>
+<div id="demo-3"></div>
+
+
+<h1>demo-4 利用<code>ImgBox</code>的方法<code>ImgBox.imgbox()</code>包装img标签</h1>
+<img src="image/4006876523_289a8296ee_m.jpg" id="demo-4"/>
+
+<h1>demo-5 包装类直接包装Image对象</h1>
+<div id="demo-5"></div>
+
+</body>
+<script>
+
+    console.log(ImgBox);
+
+    //demo-1
+    $('#demo-1').imgbox();
+
+
+    //demo-2
+    $('#demo-2').imgbox({
+
+        }
+    );
+
+    //dmeo-3
+    var img = new Image();
+    img.src = "image/3793633099_4f9c3e08b3_m.jpg";
+
+    $('#demo-3').append($(img));
+
+
+    $(img).imgbox();
+
+
+    //demo-4
+    ImgBox.imgbox($('#demo-4'));
+
+
+    //demo-5
+    var img1 = new Image();
+    img1.src = "image/4006876523_289a8296ee_m.jpg";
+    ImgBox.imgbox(img1);
+    $("#demo-5").append(img1);
+
+
+</script>
+</html>

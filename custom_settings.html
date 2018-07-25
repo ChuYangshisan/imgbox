@@ -7,7 +7,12 @@
     <script type="text/javascript" src="./js/jquery-1.12.1.min.js"></script>
     <script type="text/javascript" src="js/imgbox-1.0.1.js"></script>
 
-
+<style>
+    img{
+        width: 150px;
+        height: 150px;
+    }
+</style>
 
 </head>
 
@@ -17,17 +22,14 @@
 <img src="image/tuzi-28792711.jpg"/>
 <img src="image/yigeluobo.jpg"/>
 <img src="image/yuanluobo.jpg"/>
-
 </body>
 <script>
-    //查看全局实例: ImgBox
-    console.log('查看全局ImgBox实例',ImgBox);
-
     $('img').each(function (index,img) {
         $(img).imgbox({
             magnification:2,
             min:0.1,
-            max:20
+            max:20,
+            degree:index%2==0?0:90  //奇数索引时右旋90deg
         });
     })
 

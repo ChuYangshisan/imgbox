@@ -14,7 +14,8 @@
  *   1. 标签选择器调用, 1. $('xx').imgbox() or 2. $('xx').imgbox(settings);
  *   2. ImgBox.imgbox(img [,settings])包装img选择器或Image对象
  *
- *
+ * -v1.0.2
+ * 增加旋转角度配置
  *
  * -v1.0.1-
  * 2018-7-23 13:14:35
@@ -46,13 +47,14 @@
     var defaultOptions = {
         magnification: 1,            //默认放大倍数
         max: 5,                       //最大倍数
-        min: 0.5                      //最小倍数
+        min: 0.5,                      //最小倍数
         //width:                    //自定义了宽(高)则 magnification 针对宽(高)失效
         //height:
+        degree: 0,                  //预览时默认旋转角度
     };
 
     function ImgBox() {
-        this.origins = [],
+        this.origins = [];
             //当前被激活的Origin对象, i.e.其大图被处于预览状态
             this.activeOrigin = null;
         //大图片显示框
@@ -101,13 +103,19 @@
 
 
     //构造函数
-    var Origin = ImgBox.Origin = function (imgTag) {
+    var Origin = ImgBox.Origin = function (imgTag,settings) {
+        //默认配置
+        $.extend(this.options={}, defaultOptions);
+        //合并配置, 放入 options中
+        if (settings !== undefined) {
+            $.extend(this.options, settings);
+        }
+
+
         this.$self = $(imgTag);
         //img标签或者dom,jq对象, 统一转成jq对象, i.e.原始图片所在的容器
         this.smallImage = this.$self[0];
 
-        //默认配置
-        this.options = defaultOptions;
 
 
         //大图片box, 拖拽, 放大缩小, 其他按钮(其他按钮若是公用的则放到zoomArea中, 私有的则放到这里)
@@ -129,7 +137,7 @@
         //大图配置
         this.configLargeBox();
 
-        this.degree = 0;
+        this.degree = this.options.degree;
         this.rotate = function (direction) {
             if (direction == 'left') {
                 this.degree -= 90;
@@ -146,10 +154,10 @@
             return Math.abs(this.degree) / 90 % 2 != 0;
         };
         //清除旋转 ==> 角度置为0, 样式置为0deg
-        this.cleanRotate = function () {
-            this.degree = 0;
+        this.resetRotate = function () {
+            this.degree = this.options.degree;
             this.rotate();
-        }
+        };
 
         //配置大图box
         this.configLargeBox = function () {
@@ -190,8 +198,8 @@
                 $(_this.largeImage).height(_this.largeImage.baseHeight);
             }
 
-            //清除旋转
-            _this.cleanRotate();
+            //重置旋转
+            _this.resetRotate();
 
             //配置鼠标事件
             _this.largeImage.onmouseover = function () {
@@ -258,14 +266,8 @@
         //endregion
 
         //构造 Origin
-        var origin = new Origin(imgSelector);
+        var origin = new Origin(imgSelector,settings);
 
-
-        //合并配置, 放入 options中
-        if (settings !== undefined) {
-            $.extend(origin.options, settings);
-
-        }
 
         //原始图片标签(小图)
         //validateImgBoxOrigin()  //校验HTML标签是否符合本插件要求的规范格式
@@ -310,9 +312,6 @@
     /**由区域中心向四周放大, 或向中心收缩
      * Note: 浏览器会自动帮我们处理旋转之后的宽高差*/
     function _radiusScroll(origin, size) {  //size:[oldWidth,oldHeight,newWight,newHeight]
-        console.log(size);
-        console.log('old w/h', size[0] / size[1]);
-        console.log('new w/h', size[2] / size[3]);
         var $box = origin.$largeBox;
         var dleft, dtop;
         var oldleft_css = parseInt($box.css('left'));
@@ -324,8 +323,6 @@
         var left = oldleft_css - dleft;       //position().left 获取的是数值
         var top = oldtop_css - dtop;
 
-        console.log('new left', left);
-        console.log('new top', top);
         $box.css({
             left: left + 'px',
             top: top + 'px'

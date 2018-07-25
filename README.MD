@@ -83,6 +83,43 @@ $('#demo-1').imgbox();
 
 
 
+## 定制参数
+
+[定制参数demo](./custom_settings.html)
+
+**HTML**:
+
+```html
+<body>
+    <img src="image/hongluobo.png"/>
+    <img src="image/san-luobo.png"/>
+    <img src="image/tuzi-28792711.jpg"/>
+    <img src="image/yigeluobo.jpg"/>
+    <img src="image/yuanluobo.jpg"/>
+</body>
+```
+
+
+
+**JavaScript**:
+
+```js
+    $('img').each(function (index,img) {
+        $(img).imgbox({
+            magnification:2,
+            min:0.1,
+            max:20,
+            degree:index%2==0?0:90  //奇数索引时右旋90deg
+        });
+    })
+```
+
+
+
+
+
+
+
 ## Feedback
 
 

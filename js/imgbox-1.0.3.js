@@ -14,6 +14,8 @@
  *   1. 标签选择器调用, 1. $('xx').imgbox() or 2. $('xx').imgbox(settings);
  *   2. ImgBox.imgbox(img [,settings])包装img选择器或Image对象
  *
+ * -v1.0.3-
+ * 增加上一个下一个翻页功能
  * -v1.0.2
  * 增加旋转角度配置
  *
@@ -55,8 +57,8 @@
 
     function ImgBox() {
         this.origins = [];
-            //当前被激活的Origin对象, i.e.其大图被处于预览状态
-            this.activeOrigin = null;
+        //当前被激活的Origin对象, i.e.其大图被处于预览状态
+        this.activeOrigin = null;
         //大图片显示框
         // this.$zoomArea = $('<div class="__max_div__"><div class="__close_button__" title="点击关闭" onclick="hideMax()"><img src="img/delete.png"></div></div>');
         //存放放大图片的区域容器
@@ -66,8 +68,11 @@
             '<li class="btn-rotate rotate-right"></li></ul></div>');
         this.$titleDom = $('<div class="imgbox-item-title"></div>');
 
+        this.$previous = $('<div><i class="btn-page btn-previous"></i></div>');
+        this.$next = $('<div><i class="btn-page btn-next"></i></div>');
 
-        this.$zoomArea.append(this.$titleDom).append(this.$toolbarDom);
+        this.$zoomArea.append(this.$titleDom).append(this.$toolbarDom)
+            .append(this.$previous).append(this.$next);
 
         //遮罩层
         this.$cover = $('<div class="imgbox-cover" style="display: none;"></div>');
@@ -78,14 +83,91 @@
             this.activeOrigin.rotate(e.data);
         }.bind(this);
 
+        this.showMax = function (origin) {
+            var _this = this;
+            if (origin == null) return;
+            //判断是否更换了origin
+            if (_this.activeOrigin != origin) {
+                //移除旧的
+                //$(origin.largeImage).remove();
+                //$(origin.$zoomArea).remove();
+                if (_this.activeOrigin != null) _this.activeOrigin.$largeBox.remove();
+
+                //更新大图对象的配置     Mod: 每个Origin的大图有它自己的配置信息, 并且切换Origin后, 依然保留在
+                origin.configLargeBox();
+
+                //更新大图div中image
+                _this.$zoomArea.append(origin.$largeBox);
+                //更新标题
+                _this.$titleDom.text(origin.title);
+                //甩开图片(图片们有更新, 才需要执行)
+                ImgBox.throwOffImg();
+            }
+
+            //显示遮罩层
+            _this.$cover.show();
+            //document.body.appendChild(_this.$cover[0]);
+            //显示maxDiv
+            _this.$zoomArea.show();
+
+            //更新当前正在显示大图的 origin
+            _this.activeOrigin = origin;
+
+        };
+
+        //!解决鼠标松开后, 图片还跟着鼠标走!
+        //禁止拖动页面图片在新窗口打开
+        this.throwOffImg = function () {
+            for (i in document.images) document.images[i].ondragstart = function () {
+                return false;
+            }
+        };
+
+
+        //隐藏大图
+        this.hideMax = function () {        //页面元素 onclick属性要调用
+            this.$zoomArea.hide();    //暂时只是隐藏, 当换origin时再empty
+            this.$cover.hide();     //遮罩层隐藏起来
+        };
+
+
+        this.page = function (pre_next,cur_origin) {
+            if (this.activeOrigin == null) {
+                return;
+            }
+            var i = this.activeOrigin.offset;
+            if(pre_next=='previous'){
+                if(i<=0){
+                    return;
+                }
+                this.showMax(this.origins[i - 1]);
+            }
+            if(pre_next=='next'){
+                if(i>=this.origins.length-1) {
+                    return;
+                }
+                this.showMax(this.origins[i + 1]);
+            }
+        }
+
+
+
     }
 
+    //---------------------------------//
     //全局对象, 暴露给外部使用的
     var ImgBox = window.ImgBox = new ImgBox();
 
 
+    //事件绑定
     ImgBox.$cover.bind('click', function () {
         ImgBox.hideMax();
+    });
+    ImgBox.$previous.bind('click',function () {
+        ImgBox.page('previous')
+    });
+    ImgBox.$next.bind('click',function () {
+        ImgBox.page('next')
     });
 
 
@@ -103,9 +185,9 @@
 
 
     //构造函数
-    var Origin = ImgBox.Origin = function (imgTag,settings) {
+    var Origin = ImgBox.Origin = function (imgTag, settings) {
         //默认配置
-        $.extend(this.options={}, defaultOptions);
+        $.extend(this.options = {}, defaultOptions);
         //合并配置, 放入 options中
         if (settings !== undefined) {
             $.extend(this.options, settings);
@@ -115,7 +197,6 @@
         this.$self = $(imgTag);
         //img标签或者dom,jq对象, 统一转成jq对象, i.e.原始图片所在的容器
         this.smallImage = this.$self[0];
-
 
 
         //大图片box, 拖拽, 放大缩小, 其他按钮(其他按钮若是公用的则放到zoomArea中, 私有的则放到这里)
@@ -133,9 +214,6 @@
 
 
         // this.closeButton = $('<div class="__close_button__" title="点击关闭" onclick="hideMax()"><img src="img/delete.png"></div>')
-
-        //大图配置
-        this.configLargeBox();
 
         this.degree = this.options.degree;
         this.rotate = function (direction) {
@@ -266,7 +344,7 @@
         //endregion
 
         //构造 Origin
-        var origin = new Origin(imgSelector,settings);
+        var origin = new Origin(imgSelector, settings);
 
 
         //原始图片标签(小图)
@@ -286,6 +364,8 @@
 
         //添加至 ImbBox
         ImgBox.origins.push(origin);
+        //记录当前origin的位置
+        origin.offset = ImgBox.origins.length-1;
         return ImgBox;
     };
 
@@ -330,53 +410,6 @@
     }
 
 
-    Origin.prototype.configLargeBox =
-        ImgBox.showMax = function (origin) {
-            var _this = this;
-            if (origin == null) return;
-            //判断是否更换了origin
-            if (_this.activeOrigin != origin) {
-                //移除旧的
-                //$(origin.largeImage).remove();
-                //$(origin.$zoomArea).remove();
-                if (_this.activeOrigin != null) _this.activeOrigin.$largeBox.remove();
-
-                //更新大图对象的配置     Mod: 每个Origin的大图有它自己的配置信息, 并且切换Origin后, 依然保留在
-                origin.configLargeBox();
-
-                //更新大图div中image
-                _this.$zoomArea.append(origin.$largeBox);
-                //更新标题
-                _this.$titleDom.text(origin.title);
-                //甩开图片(图片们有更新, 才需要执行)
-                ImgBox.throwOffImg();
-            }
-
-            //显示遮罩层
-            _this.$cover.show();
-            //document.body.appendChild(_this.$cover[0]);
-            //显示maxDiv
-            _this.$zoomArea.show();
-
-            //更新当前正在显示大图的 origin
-            _this.activeOrigin = origin;
-
-        };
-
-    //!解决鼠标松开后, 图片还跟着鼠标走!
-    //禁止拖动页面图片在新窗口打开
-    ImgBox.throwOffImg = function () {
-        for (i in document.images) document.images[i].ondragstart = function () {
-            return false;
-        }
-    };
-
-
-    //隐藏大图
-    ImgBox.hideMax = function () {        //页面元素 onclick属性要调用
-        ImgBox.$zoomArea.hide();    //暂时只是隐藏, 当换origin时再empty
-        ImgBox.$cover.hide();     //遮罩层隐藏起来
-    };
 
 
     //鼠标滚轮放大缩小

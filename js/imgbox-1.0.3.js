@@ -130,7 +130,7 @@
             this.$cover.hide();     //遮罩层隐藏起来
         };
 
-
+        //预览图翻页
         this.page = function (pre_next,cur_origin) {
             if (this.activeOrigin == null) {
                 return;
@@ -150,7 +150,10 @@
             }
         }
 
-
+        //清空origins
+        this.clear = function () {
+            this.origins=[];
+        }
 
     }
 
@@ -362,7 +365,7 @@
         _addWheelListener();
 
 
-        //添加至 ImbBox
+        //添加至 ImgBox
         ImgBox.origins.push(origin);
         //记录当前origin的位置
         origin.offset = ImgBox.origins.length-1;
